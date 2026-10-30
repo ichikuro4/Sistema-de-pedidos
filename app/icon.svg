@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="WALL y Eva">
+  <rect width="512" height="512" rx="112" fill="#101827"/>
+  <rect x="66" y="139" width="182" height="178" rx="40" fill="#d9a438"/>
+  <rect x="83" y="157" width="148" height="95" rx="27" fill="#55432c"/>
+  <ellipse cx="126" cy="204" rx="27" ry="31" fill="#f6e4af"/>
+  <ellipse cx="191" cy="204" rx="27" ry="31" fill="#f6e4af"/>
+  <ellipse cx="126" cy="204" rx="11" ry="16" fill="#1a2532"/>
+  <ellipse cx="191" cy="204" rx="11" ry="16" fill="#1a2532"/>
+  <rect x="274" y="116" width="171" height="218" rx="82" fill="#f8fbff"/>
+  <rect x="293" y="164" width="133" height="100" rx="48" fill="#22344a"/>
+  <ellipse cx="360" cy="214" rx="39" ry="19" fill="#7dd3fc"/>
+  <path d="M148 350h216" stroke="#f8fbff" stroke-width="19" stroke-linecap="round"/>
+  <text x="256" y="419" fill="#f8fbff" font-family="Arial, sans-serif" font-size="46" font-weight="700" text-anchor="middle" letter-spacing="5">W · E</text>
+</svg>
