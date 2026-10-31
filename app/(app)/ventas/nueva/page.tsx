@@ -19,7 +19,7 @@ type VentaLista = {
 };
 
 const dinero = new Intl.NumberFormat("es-PE", { style: "currency", currency: "PEN" });
-const campo = "mt-1.5 w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-base text-slate-950 outline-none focus:border-slate-700 focus:ring-2 focus:ring-slate-200 disabled:bg-slate-100";
+const campo = "ui-input mt-1.5 text-base";
 
 function centimos(valor: string) {
   if (!/^\d+(?:\.\d{1,2})?$/.test(valor)) return null;
@@ -197,14 +197,14 @@ export default function NuevaVentaPage() {
   return (
     <div className="mx-auto max-w-3xl pb-12">
       <header className="mb-7">
-        <p className="text-sm font-semibold uppercase tracking-widest text-slate-500">El cuchitril de WALL y Eva</p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">Nueva venta</h1>
-        <p className="mt-2 text-sm text-slate-600">Registra el cliente, las figuras y el pago inicial.</p>
+        <p className="ui-eyebrow">El cuchitril de WALL y Eva</p>
+        <h1 className="ui-title mt-2">Nueva venta</h1>
+        <p className="ui-muted mt-2 text-sm">Registra el cliente, las figuras y el pago inicial.</p>
       </header>
       <form onSubmit={alEnviar} onKeyDown={avanzarConEnter} noValidate className="space-y-5">
         <fieldset disabled={ocupado || Boolean(ventaPendiente) || guardada} className="space-y-5 disabled:opacity-75">
-          <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-            <h2 className="text-lg font-semibold text-slate-950">Cliente</h2>
+          <section className="ui-panel p-4 sm:p-6">
+            <h2 className="ui-section-title"><span className="mr-2 text-[#d1882d]">01</span> Cliente</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <label className="block text-sm font-medium text-slate-700">Nombre *
                 <input autoFocus className={campo} type="text" autoComplete="name" value={clienteNombre} onChange={(e) => setClienteNombre(e.target.value)} required placeholder="Nombre del cliente" />
@@ -214,15 +214,15 @@ export default function NuevaVentaPage() {
               </label>
             </div>
           </section>
-          <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+          <section className="ui-panel p-4 sm:p-6">
             <div className="flex items-baseline justify-between gap-3">
-              <h2 className="text-lg font-semibold text-slate-950">Productos</h2>
+              <h2 className="ui-section-title"><span className="mr-2 text-[#d1882d]">02</span> Figuras</h2>
               <span className="text-xs text-slate-500">{productos.length} {productos.length === 1 ? "figura" : "figuras"}</span>
             </div>
             <datalist id="figuras-vendidas">{sugerencias.map((item) => <option key={item.nombre} value={item.nombre} label={`Último precio: ${dinero.format(item.precio)}`} />)}</datalist>
             <div className="mt-4 space-y-4">
               {productos.map((producto, indice) => (
-                <div key={producto.key} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <div key={producto.key} className="rounded-2xl border border-[#dce7df] bg-[#f7faf6] p-4">
                   <div className="flex items-center justify-between gap-3">
                     <h3 className="font-semibold text-slate-800">Figura {indice + 1}</h3>
                     <button type="button" onClick={() => setProductos((actuales) => actuales.filter((item) => item.key !== producto.key))} disabled={productos.length === 1} className="rounded-lg px-2 py-1 text-sm font-medium text-rose-700 hover:bg-rose-50 disabled:cursor-not-allowed disabled:text-slate-400">Quitar</button>
@@ -233,7 +233,7 @@ export default function NuevaVentaPage() {
                         <input className={campo} list="figuras-vendidas" value={producto.nombre} onChange={(e) => cambiarProducto(producto.key, "nombre", e.target.value)} required placeholder="Ej. WALL-E" aria-describedby="ayuda-figuras" />
                       </label>
                       {sugerencias.filter((item) => item.nombre.toLocaleLowerCase("es") === producto.nombre.trim().toLocaleLowerCase("es")).map((item) => (
-                        <button key={item.nombre} type="button" onClick={() => setProductos((actuales) => actuales.map((actual) => actual.key === producto.key ? { ...actual, precio: item.precio.toFixed(2), precioManual: false } : actual))} className="mt-1 rounded-lg py-1 text-left text-xs font-medium text-indigo-700 underline underline-offset-2">Usar último precio: {dinero.format(item.precio)}</button>
+                        <button key={item.nombre} type="button" onClick={() => setProductos((actuales) => actuales.map((actual) => actual.key === producto.key ? { ...actual, precio: item.precio.toFixed(2), precioManual: false } : actual))} className="mt-1 rounded-lg py-1 text-left text-xs font-semibold text-[#17636b] underline underline-offset-2">Usar último precio: {dinero.format(item.precio)}</button>
                       ))}
                     </div>
                     <label className="block text-sm font-medium text-slate-700">Precio (S/) *
@@ -247,19 +247,19 @@ export default function NuevaVentaPage() {
               ))}
             </div>
             <p id="ayuda-figuras" className="mt-3 text-xs text-slate-500">{cargandoSugerencias ? "Cargando nombres anteriores…" : "Puedes elegir un nombre anterior o escribir uno nuevo. El precio sugerido se puede cambiar."}</p>
-            <button type="button" onClick={() => setProductos((actuales) => [...actuales, { key: siguienteKey.current++, nombre: "", descripcion: "", precio: "", precioManual: false }])} className="mt-4 w-full rounded-xl border border-dashed border-slate-400 px-4 py-3 text-sm font-semibold text-slate-800 hover:border-slate-700 hover:bg-slate-50">+ Agregar otro producto</button>
+            <button type="button" onClick={() => setProductos((actuales) => [...actuales, { key: siguienteKey.current++, nombre: "", descripcion: "", precio: "", precioManual: false }])} className="mt-4 w-full rounded-xl border-2 border-dashed border-[#9cc8bd] px-4 py-3 text-sm font-bold text-[#17636b] hover:bg-[#edf7f0]">+ Agregar otra figura</button>
           </section>
-          <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-            <h2 className="text-lg font-semibold text-slate-950">Pago</h2>
+          <section className="ui-panel p-4 sm:p-6">
+            <h2 className="ui-section-title"><span className="mr-2 text-[#d1882d]">03</span> Pago</h2>
             <div className="mt-4 grid grid-cols-2 gap-3">
               {(["completo", "parcial"] as const).map((tipo) => (
-                <label key={tipo} className={`flex cursor-pointer items-center gap-2 rounded-xl border p-3 text-sm font-medium capitalize ${tipoPago === tipo ? "border-slate-900 bg-slate-50 text-slate-950" : "border-slate-200 text-slate-700"}`}>
-                  <input type="radio" name="tipo_pago" value={tipo} checked={tipoPago === tipo} onChange={() => setTipoPago(tipo)} className="accent-slate-900" />{tipo}
+                <label key={tipo} className={`flex cursor-pointer items-center gap-2 rounded-xl border p-3 text-sm font-semibold capitalize ${tipoPago === tipo ? "border-[#17636b] bg-[#e9f3ef] text-[#124d55]" : "border-[#dce7df] text-[#62767a]"}`}>
+                  <input type="radio" name="tipo_pago" value={tipo} checked={tipoPago === tipo} onChange={() => setTipoPago(tipo)} className="accent-[#17636b]" />{tipo}
                 </label>
               ))}
             </div>
-            <div className="mt-5 border-t border-slate-200 pt-4">
-              <div className="flex items-center justify-between gap-3 text-lg font-bold text-slate-950"><span>Total</span><output>{dinero.format(totalCentimos / 100)}</output></div>
+            <div className="mt-5 border-t border-[#e1e8e3] pt-4">
+              <div className="flex items-center justify-between gap-3 text-lg font-bold text-[#203338]"><span>Total</span><output>{dinero.format(totalCentimos / 100)}</output></div>
               {tipoPago === "completo" ? (
                 <label className="mt-4 block text-sm font-medium text-slate-700">Monto inicial
                   <input className={campo} value={dinero.format(totalCentimos / 100)} readOnly aria-readonly="true" />
@@ -269,22 +269,22 @@ export default function NuevaVentaPage() {
                   <label className="mt-4 block text-sm font-medium text-slate-700">Monto que abona ahora
                     <input className={campo} type="number" inputMode="decimal" min="0" step="0.01" value={abono} onChange={(e) => setAbono(e.target.value)} placeholder="0.00" />
                   </label>
-                  <div className="mt-4 flex items-center justify-between gap-3 text-sm font-semibold text-amber-800"><span>Saldo pendiente</span><output>{dinero.format(Math.max(0, totalCentimos - abonoCentimos) / 100)}</output></div>
+                  <div className="mt-4 flex items-center justify-between gap-3 rounded-xl bg-[#fff4dd] p-3 text-sm font-bold text-[#805114]"><span>Saldo pendiente</span><output>{dinero.format(Math.max(0, totalCentimos - abonoCentimos) / 100)}</output></div>
                 </>
               )}
             </div>
           </section>
         </fieldset>
-        <button type="submit" disabled={ocupado || Boolean(ventaPendiente) || guardada} className="w-full rounded-xl bg-slate-900 px-5 py-4 text-base font-semibold text-white shadow-sm hover:bg-slate-800 disabled:cursor-wait disabled:opacity-60">{ocupado || guardada ? "Guardando…" : "Guardar venta"}</button>
+        <button type="submit" disabled={ocupado || Boolean(ventaPendiente) || guardada} className="ui-primary w-full py-4 text-base">{ocupado || guardada ? "Guardando…" : "Guardar venta"}</button>
       </form>
       {ventaPendiente && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4">
-          <div role="dialog" aria-modal="true" aria-labelledby="titulo-duplicados" className="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl sm:p-6">
+          <div role="dialog" aria-modal="true" aria-labelledby="titulo-duplicados" className="ui-panel w-full max-w-md p-5 shadow-2xl sm:p-6">
             <h2 id="titulo-duplicados" className="text-xl font-bold text-slate-950">Figuras en ventas activas</h2>
             <p className="mt-3 text-sm text-slate-700">Estas figuras ya están en ventas activas: {duplicados.join(", ")}. ¿Continuar?</p>
             <div className="mt-6 grid grid-cols-2 gap-3">
-              <button type="button" autoFocus onClick={() => { setVentaPendiente(null); setDuplicados([]); }} className="rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-800">Cancelar</button>
-              <button type="button" disabled={ocupado} onClick={() => guardar(ventaPendiente)} className="rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white disabled:opacity-60">{ocupado ? "Guardando…" : "Continuar"}</button>
+              <button type="button" autoFocus onClick={() => { setVentaPendiente(null); setDuplicados([]); }} className="ui-soft">Cancelar</button>
+              <button type="button" disabled={ocupado} onClick={() => guardar(ventaPendiente)} className="ui-primary">{ocupado ? "Guardando…" : "Continuar"}</button>
             </div>
           </div>
         </div>

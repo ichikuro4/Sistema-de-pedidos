@@ -1,9 +1,9 @@
 export type EstadoVenta = "pendiente" | "pagado" | "cancelado";
 
 const estilos: Record<EstadoVenta, string> = {
-  pendiente: "bg-amber-100 text-amber-800 ring-amber-200",
-  pagado: "bg-emerald-100 text-emerald-800 ring-emerald-200",
-  cancelado: "bg-slate-100 text-slate-600 ring-slate-200",
+  pendiente: "bg-[#fff0cd] text-[#805114] ring-[#f2dca7]",
+  pagado: "bg-[#dff3e7] text-[#246547] ring-[#bce5cd]",
+  cancelado: "bg-[#edf0ed] text-[#657471] ring-[#d8dfdb]",
 };
 
 const formatoDinero = new Intl.NumberFormat("es-PE", { style: "currency", currency: "PEN" });

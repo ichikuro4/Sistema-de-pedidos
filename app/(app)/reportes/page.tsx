@@ -28,7 +28,7 @@ type Respuesta = { data: unknown; count: number | null; error: { message: string
 
 const zona = "America/Lima";
 const formatoDia = new Intl.DateTimeFormat("en-CA", { timeZone: zona, year: "numeric", month: "2-digit", day: "2-digit" });
-const campo = "mt-1.5 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-slate-700 focus:ring-2 focus:ring-slate-200";
+const campo = "ui-input mt-1.5 text-sm";
 
 function diaLima(valor: Date | string) {
   const partes = Object.fromEntries(formatoDia.formatToParts(new Date(valor)).map(({ type, value }) => [type, value]));
@@ -180,11 +180,12 @@ export default function ReportesPage() {
   return (
     <div className="mx-auto max-w-6xl pb-12">
       <header>
-        <p className="text-sm font-medium text-slate-500">Ventas y cobros</p>
-        <h1 className="mt-1 text-3xl font-bold text-slate-950">Reportes</h1>
+        <p className="ui-eyebrow">Una vista clara del negocio</p>
+        <h1 className="ui-title mt-2">Reportes</h1>
+        <p className="ui-muted mt-2 text-sm">Revisa lo vendido y cobrado en el periodo que elijas.</p>
       </header>
 
-      <section aria-label="Rango del reporte" className="mt-7 grid gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-2 sm:p-6">
+      <section aria-label="Rango del reporte" className="ui-panel mt-7 grid gap-4 p-4 sm:grid-cols-2 sm:p-6">
         <label className="text-sm font-medium text-slate-700">Desde
           <input className={campo} type="date" value={desde} max={hasta || undefined} onChange={(e) => { setDesde(e.target.value); setCargando(true); }} />
         </label>
@@ -204,10 +205,10 @@ export default function ReportesPage() {
               { titulo: "Total cobrado", valor: dinero(totalCobrado), ayuda: "Pagos recibidos en el rango" },
               { titulo: "Total por cobrar", valor: dinero(totalPorCobrar), ayuda: "Saldo pendiente de todas las fechas" },
             ].map((tarjeta) => (
-              <div key={tarjeta.titulo} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <h2 className="text-sm font-medium text-slate-600">{tarjeta.titulo}</h2>
-                <p className="mt-2 text-2xl font-bold text-slate-950">{tarjeta.valor}</p>
-                <p className="mt-1 text-xs text-slate-500">{tarjeta.ayuda}</p>
+              <div key={tarjeta.titulo} className="ui-panel border-t-4 border-t-[#f1b457] p-5">
+                <h2 className="ui-muted text-sm font-medium">{tarjeta.titulo}</h2>
+                <p className="mt-2 text-2xl font-extrabold tracking-tight text-[#203338]">{tarjeta.valor}</p>
+                <p className="ui-muted mt-1 text-xs">{tarjeta.ayuda}</p>
               </div>
             ))}
           </section>
@@ -218,22 +219,22 @@ export default function ReportesPage() {
               { titulo: "Pagadas", valor: estados.pagado },
               { titulo: "Canceladas", valor: estados.cancelado },
             ].map((tarjeta) => (
-              <div key={tarjeta.titulo} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                <h2 className="text-sm text-slate-600">{tarjeta.titulo}</h2>
-                <p className="mt-1 text-2xl font-bold text-slate-950">{tarjeta.valor}</p>
+              <div key={tarjeta.titulo} className="ui-panel p-4">
+                <h2 className="ui-muted text-sm">{tarjeta.titulo}</h2>
+                <p className="mt-1 text-2xl font-extrabold text-[#203338]">{tarjeta.valor}</p>
               </div>
             ))}
           </section>
 
-          <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-            <h2 className="text-lg font-semibold text-slate-950">Ventas por día</h2>
+          <section className="ui-panel mt-6 p-4 sm:p-6">
+            <h2 className="ui-section-title">Ventas por día</h2>
             <p className="mt-1 text-xs text-slate-500">Monto de ventas no canceladas. Desliza para ver más días.</p>
             <div className="mt-5 overflow-x-auto">
               <ol className="flex h-48 items-end gap-1 border-b border-slate-200 pb-2" style={{ minWidth: Math.max(480, dias.length * 34) }}>
                 {dias.map(({ dia, monto }) => (
                   <li key={dia} className="h-full min-w-7 flex-1">
-                    <button type="button" onClick={() => setDiaSeleccionado(dia)} title={`${dia}: ${dinero(monto)}`} aria-label={`${dia}: ${dinero(monto)}`} className="flex h-full w-full flex-col items-center justify-end gap-1 rounded focus:outline-2 focus:outline-indigo-700">
-                      <span className="w-full rounded-t bg-indigo-600" style={{ height: monto > 0 ? Math.max(3, Math.round((monto / maximo) * 148)) : 0 }} />
+                    <button type="button" onClick={() => setDiaSeleccionado(dia)} title={`${dia}: ${dinero(monto)}`} aria-label={`${dia}: ${dinero(monto)}`} className="flex h-full w-full flex-col items-center justify-end gap-1 rounded focus:outline-2 focus:outline-[#17636b]">
+                      <span className={`w-full rounded-t ${diaSeleccionado === dia ? "bg-[#f1b457]" : "bg-[#3c918e]"}`} style={{ height: monto > 0 ? Math.max(3, Math.round((monto / maximo) * 148)) : 0 }} />
                       <span className="text-[10px] text-slate-500">{dia.slice(8, 10)}</span>
                     </button>
                   </li>
@@ -244,8 +245,8 @@ export default function ReportesPage() {
           </section>
 
           <section aria-label="Exportaciones CSV" className="mt-6 flex flex-col gap-3 sm:flex-row">
-            <button type="button" disabled={exportando !== null} onClick={() => void exportar("ventas")} className="rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-60">{exportando === "ventas" ? "Preparando CSV…" : "Exportar ventas a CSV"}</button>
-            <button type="button" disabled={exportando !== null} onClick={() => void exportar("pagos")} className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-60">{exportando === "pagos" ? "Preparando CSV…" : "Exportar pagos a CSV"}</button>
+            <button type="button" disabled={exportando !== null} onClick={() => void exportar("ventas")} className="ui-primary">{exportando === "ventas" ? "Preparando CSV…" : "Exportar ventas a CSV"}</button>
+            <button type="button" disabled={exportando !== null} onClick={() => void exportar("pagos")} className="ui-soft">{exportando === "pagos" ? "Preparando CSV…" : "Exportar pagos a CSV"}</button>
           </section>
         </>
       )}

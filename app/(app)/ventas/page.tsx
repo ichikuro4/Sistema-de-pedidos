@@ -21,7 +21,7 @@ type VentaResumen = {
 };
 
 const porPagina = 20;
-const campo = "w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-slate-700 focus:ring-2 focus:ring-slate-200";
+const campo = "ui-input mt-1.5 text-sm";
 
 export default function VentasPage() {
   const router = useRouter();
@@ -100,13 +100,14 @@ export default function VentasPage() {
     <div className="mx-auto max-w-7xl pb-12">
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-sm font-medium text-slate-500">Panel principal</p>
-          <h1 className="mt-1 text-3xl font-bold text-slate-950">Ventas</h1>
+          <p className="ui-eyebrow">Tu negocio al día</p>
+          <h1 className="ui-title mt-2">Ventas</h1>
+          <p className="ui-muted mt-2 text-sm">Encuentra pedidos, revisa saldos y continúa atendiendo.</p>
         </div>
-        <Link href="/ventas/nueva" className="rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800">Nueva venta</Link>
+        <Link href="/ventas/nueva" className="ui-primary w-full sm:w-auto"><span className="text-lg leading-none">＋</span> Nueva venta</Link>
       </header>
 
-      <section aria-label="Filtros de ventas" className="mt-7 grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-4">
+      <section aria-label="Filtros de ventas" className="ui-panel mt-7 grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-4 lg:p-5">
         <label className="text-sm font-medium text-slate-700">Estado
           <select value={estado} onChange={(e) => { setEstado(e.target.value as typeof estado); setPagina(0); }} className={`mt-1.5 ${campo}`}>
             <option value="todas">Todas</option>
@@ -126,16 +127,24 @@ export default function VentasPage() {
         </label>
       </section>
 
-      <section className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 text-sm text-slate-600">
+      <section className="ui-panel mt-5 overflow-hidden">
+        <div className="ui-muted flex items-center justify-between border-b border-[#e1e8e3] px-4 py-4 text-sm sm:px-5">
           <span>{cargando ? "Cargando ventas…" : `${cantidad} ${cantidad === 1 ? "venta" : "ventas"}`}</span>
           <span>Más recientes primero</span>
         </div>
         {error ? (
           <p role="alert" className="p-6 text-sm text-rose-700">{error}</p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-[930px] w-full text-left text-sm">
+          <>
+          <div className="divide-y divide-[#e1e8e3] md:hidden">
+            {!cargando && ventas.length === 0 && <p className="ui-muted px-5 py-12 text-center text-sm">No hay ventas con estos filtros.</p>}
+            {ventas.map((venta) => <Link key={venta.id} href={`/ventas/${venta.id}`} className="block p-4 transition-colors hover:bg-[#f4faf6] focus-visible:outline-2 focus-visible:outline-[#17636b]">
+              <div className="flex items-start justify-between gap-3"><div><p className="ui-eyebrow">{venta.folio}</p><h2 className="mt-1 font-bold text-[#203338]">{venta.cliente_nombre}</h2><p className="ui-muted mt-1 text-xs">{fecha(venta.fecha)} · {venta.cliente_telefono}</p></div><EstadoBadge estado={venta.estado} /></div>
+              <div className="mt-4 grid grid-cols-3 gap-2 rounded-xl bg-[#f1f6f2] p-3 text-sm"><div><p className="ui-muted text-xs">Total</p><p className="mt-1 font-semibold">{dinero(venta.total)}</p></div><div><p className="ui-muted text-xs">Pagado</p><p className="mt-1 font-semibold">{dinero(venta.pagado)}</p></div><div><p className="text-xs text-[#94621d]">Saldo</p><p className="mt-1 font-bold text-[#805114]">{dinero(venta.saldo)}</p></div></div>
+            </Link>)}
+          </div>
+          <div className="hidden overflow-x-auto md:block">
+            <table className="ui-table min-w-[930px] w-full text-left text-sm">
               <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                 <tr>
                   {["Folio", "Fecha", "Cliente", "Teléfono", "Total", "Pagado", "Saldo", "Estado"].map((columna) => <th key={columna} scope="col" className="px-4 py-3 font-semibold">{columna}</th>)}
@@ -158,12 +167,13 @@ export default function VentasPage() {
               </tbody>
             </table>
           </div>
+          </>
         )}
         {!error && cantidad > 0 && (
-          <nav aria-label="Paginación de ventas" className="flex items-center justify-between gap-3 border-t border-slate-200 px-4 py-3 text-sm">
-            <button type="button" disabled={pagina === 0 || cargando} onClick={() => setPagina((actual) => actual - 1)} className="rounded-lg border border-slate-300 px-3 py-2 font-medium text-slate-800 disabled:opacity-40">Anterior</button>
+          <nav aria-label="Paginación de ventas" className="flex items-center justify-between gap-3 border-t border-[#e1e8e3] px-4 py-3 text-sm">
+            <button type="button" disabled={pagina === 0 || cargando} onClick={() => setPagina((actual) => actual - 1)} className="ui-soft disabled:opacity-40">Anterior</button>
             <span className="text-center text-slate-600">Página {pagina + 1} de {paginas}</span>
-            <button type="button" disabled={pagina + 1 >= paginas || cargando} onClick={() => setPagina((actual) => actual + 1)} className="rounded-lg border border-slate-300 px-3 py-2 font-medium text-slate-800 disabled:opacity-40">Siguiente</button>
+            <button type="button" disabled={pagina + 1 >= paginas || cargando} onClick={() => setPagina((actual) => actual + 1)} className="ui-soft disabled:opacity-40">Siguiente</button>
           </nav>
         )}
       </section>

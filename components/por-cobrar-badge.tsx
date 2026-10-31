@@ -33,7 +33,7 @@ export function PorCobrarBadge() {
   return (
     <span
       aria-label={cantidad === null ? "Cargando ventas por cobrar" : `${cantidad} ventas por cobrar`}
-      className="inline-flex min-w-6 items-center justify-center rounded-full bg-amber-100 px-1.5 py-0.5 text-xs font-bold text-amber-900"
+      className="inline-flex min-w-6 items-center justify-center rounded-full bg-[#f8dfaa] px-1.5 py-0.5 text-xs font-extrabold text-[#805114]"
     >
       {cantidad ?? "…"}
     </span>

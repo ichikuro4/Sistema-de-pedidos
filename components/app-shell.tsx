@@ -1,37 +1,41 @@
+import Image from "next/image";
 import Link from "next/link";
+import { AppNavigation } from "@/components/app-navigation";
 import { LogoutButton } from "@/components/logout-button";
-import { PorCobrarBadge } from "@/components/por-cobrar-badge";
 
-const navigation = [
-  { href: "/ventas", label: "Ventas" },
-  { href: "/ventas/nueva", label: "Nueva venta" },
-  { href: "/por-cobrar", label: "Por cobrar" },
-  { href: "/reportes", label: "Reportes" },
-];
+function Marca({ compacta = false }: { compacta?: boolean }) {
+  return (
+    <Link href="/ventas" className="flex items-center gap-3" aria-label="WALL y Eva, ir a ventas">
+      <Image src="/icon.svg" width={compacta ? 42 : 54} height={compacta ? 42 : 54} alt="" className="rounded-2xl shadow-sm" priority />
+      <span className="min-w-0">
+        <span className="block text-[10px] font-extrabold uppercase tracking-[.16em] text-[#7a8a83]">El cuchitril de</span>
+        <span className="block truncate text-lg font-extrabold leading-tight tracking-tight text-[#1a3b40]">WALL y Eva</span>
+      </span>
+    </Link>
+  );
+}
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen md:flex">
-      <aside className="border-b border-slate-200 bg-white p-5 md:flex md:min-h-screen md:w-64 md:flex-col md:border-b-0 md:border-r">
-        <Link href="/ventas" className="block text-lg font-bold text-slate-950">
-          WALL y Eva
-        </Link>
-        <p className="mt-1 text-xs text-slate-500">Panel de ventas</p>
-        <nav className="mt-8 flex gap-2 overflow-auto md:block md:space-y-2">
-          {navigation.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="flex items-center justify-between gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950"
-            >
-              {item.label}
-              {item.href === "/por-cobrar" && <PorCobrarBadge />}
-            </Link>
-          ))}
-        </nav>
-        <LogoutButton />
+    <div className="app-canvas min-h-screen">
+      <aside className="fixed inset-x-0 bottom-0 z-40 border-t border-[#dce7e1] bg-[#fffefa]/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_28px_-22px_#214347] backdrop-blur md:inset-y-0 md:left-0 md:right-auto md:flex md:w-64 md:flex-col md:border-r md:border-t-0 md:pb-0 md:shadow-none">
+        <div className="hidden px-6 pt-7 md:block"><Marca /></div>
+        <AppNavigation />
+        <div className="hidden px-4 pb-6 md:mt-auto md:block">
+          <div className="mb-4 rounded-2xl border border-[#e6e8df] bg-[#f7f4e9] p-4 text-xs leading-relaxed text-[#627572]">Tu colección, tus ventas y tus cobros en un solo lugar.</div>
+          <LogoutButton />
+        </div>
       </aside>
-      <main className="flex-1 p-6 md:p-10">{children}</main>
+
+      <div className="md:pl-64">
+        <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-[#e2e9e3] bg-[#fffefa]/95 px-4 py-3 backdrop-blur md:hidden">
+          <Marca compacta />
+          <LogoutButton compact />
+        </header>
+        <main className="mx-auto w-full max-w-[1500px] px-4 pb-[calc(7rem+env(safe-area-inset-bottom))] pt-6 sm:px-6 md:px-8 md:pb-16 md:pt-10 xl:px-10">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

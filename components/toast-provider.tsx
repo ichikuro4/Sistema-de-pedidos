@@ -21,12 +21,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={mostrar}>
       {children}
-      <div className="pointer-events-none fixed inset-x-4 bottom-4 z-[100] flex flex-col items-center gap-2" aria-live="polite">
+      <div className="pointer-events-none fixed inset-x-4 bottom-[calc(5.6rem+env(safe-area-inset-bottom))] z-[100] flex flex-col items-center gap-2 md:bottom-6" aria-live="polite">
         {avisos.map((aviso) => (
           <div
             key={aviso.id}
             role={aviso.tipo === "error" ? "alert" : "status"}
-            className={`pointer-events-auto flex w-full max-w-md items-start justify-between gap-3 rounded-xl border px-4 py-3 text-sm font-medium shadow-lg ${aviso.tipo === "error" ? "border-rose-200 bg-rose-50 text-rose-900" : "border-emerald-200 bg-emerald-50 text-emerald-900"}`}
+            className={`pointer-events-auto flex w-full max-w-md items-start justify-between gap-3 rounded-2xl border px-4 py-3 text-sm font-semibold shadow-xl ${aviso.tipo === "error" ? "border-rose-200 bg-[#fff2ef] text-rose-900" : "border-[#bce5cd] bg-[#ecf8f0] text-[#246547]"}`}
           >
             <span>{aviso.mensaje}</span>
             <button type="button" onClick={() => setAvisos((actuales) => actuales.filter((actual) => actual.id !== aviso.id))} aria-label="Cerrar aviso" className="rounded px-1 text-lg leading-none opacity-70 hover:opacity-100">×</button>

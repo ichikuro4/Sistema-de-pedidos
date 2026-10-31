@@ -71,16 +71,19 @@ export default function PorCobrarPage() {
   return (
     <div className="mx-auto max-w-7xl pb-12">
       <header>
-        <p className="text-sm font-medium text-slate-500">Cobros pendientes</p>
-        <h1 className="mt-1 text-3xl font-bold text-slate-950">Por cobrar</h1>
+        <p className="ui-eyebrow">Seguimiento de pedidos</p>
+        <h1 className="ui-title mt-2">Por cobrar</h1>
+        <p className="ui-muted mt-2 text-sm">Prioriza las ventas más antiguas y llama al cliente en un toque.</p>
         {!cargando && !error && (
-          <p className="mt-3 rounded-xl bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900">
-            {ventas.length} ventas pendientes · {dinero(totalPorCobrar)} por cobrar
+          <p className="mt-5 rounded-[1.4rem] bg-[#214c50] px-5 py-5 text-sm font-medium text-[#d7e9e2] shadow-lg shadow-[#183e3d]/10">
+            <span className="block text-xs font-bold uppercase tracking-[.15em] text-[#b4d8d1]">Saldo por cobrar</span>
+            <strong className="mt-1 block text-3xl text-white">{dinero(totalPorCobrar)}</strong>
+            <span className="mt-2 block">{ventas.length} {ventas.length === 1 ? "venta pendiente" : "ventas pendientes"}</span>
           </p>
         )}
       </header>
 
-      <section className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <section className="ui-panel mt-6 overflow-hidden">
         {cargando ? (
           <p className="px-5 py-10 text-sm text-slate-600">Cargando ventas pendientes…</p>
         ) : error ? (
@@ -88,8 +91,24 @@ export default function PorCobrarPage() {
         ) : ventas.length === 0 ? (
           <p className="px-5 py-12 text-center text-sm text-slate-600">No hay ventas pendientes</p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-[900px] w-full text-left text-sm">
+          <>
+          <div className="divide-y divide-[#e1e8e3] md:hidden">
+            {ventas.map((venta) => {
+              const dias = Math.max(0, Math.floor((ahora - new Date(venta.fecha).getTime()) / milisegundosPorDia));
+              const vieja = dias > 7 && Number(venta.saldo) > 0;
+              return <div key={venta.id} className={`p-4 ${vieja ? "bg-[#fff8e9]" : ""}`}>
+                <button type="button" onClick={() => router.push(`/ventas/${venta.id}`)} className="w-full text-left focus-visible:outline-2 focus-visible:outline-[#17636b]">
+                  <span className="flex items-center justify-between gap-2"><span className="ui-eyebrow">{venta.folio}</span>{vieja && <span className="rounded-full bg-[#f8dfaa] px-2 py-1 text-xs font-bold text-[#805114]">Más de 7 días</span>}</span>
+                  <span className="mt-2 block text-lg font-bold text-[#203338]">{venta.cliente_nombre}</span>
+                  <span className="ui-muted mt-1 block text-xs">{fecha(venta.fecha)} · Hace {dias} {dias === 1 ? "día" : "días"}</span>
+                  <span className="mt-4 flex items-end justify-between"><span className="ui-muted text-xs">Total {dinero(venta.total)}</span><span className="text-right"><span className="block text-xs text-[#94621d]">Saldo pendiente</span><strong className="text-lg text-[#805114]">{dinero(venta.saldo)}</strong></span></span>
+                </button>
+                <a href={`tel:${venta.cliente_telefono.replace(/[^\d+]/g, "")}`} className="ui-soft mt-3 w-full">Llamar · {venta.cliente_telefono}</a>
+              </div>;
+            })}
+          </div>
+          <div className="hidden overflow-x-auto md:block">
+            <table className="ui-table min-w-[900px] w-full text-left text-sm">
               <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                 <tr>
                   {["Folio", "Fecha", "Cliente", "Teléfono", "Total", "Saldo", "Días desde la venta"].map((columna) => (
@@ -141,6 +160,7 @@ export default function PorCobrarPage() {
               </tbody>
             </table>
           </div>
+          </>
         )}
       </section>
     </div>
