@@ -29,7 +29,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             className={`pointer-events-auto flex w-full max-w-md items-start justify-between gap-3 rounded-2xl border px-4 py-3 text-sm font-semibold shadow-xl ${aviso.tipo === "error" ? "border-rose-200 bg-[#fff2ef] text-rose-900" : "border-[#bce5cd] bg-[#ecf8f0] text-[#246547]"}`}
           >
             <span>{aviso.mensaje}</span>
-            <button type="button" onClick={() => setAvisos((actuales) => actuales.filter((actual) => actual.id !== aviso.id))} aria-label="Cerrar aviso" className="rounded px-1 text-lg leading-none opacity-70 hover:opacity-100">×</button>
+            <button type="button" onClick={() => setAvisos((actuales) => actuales.filter((actual) => actual.id !== aviso.id))} aria-label="Cerrar aviso" className="grid min-h-8 min-w-8 place-items-center rounded-lg text-lg leading-none opacity-70 hover:bg-black/5 hover:opacity-100">×</button>
           </div>
         ))}
       </div>

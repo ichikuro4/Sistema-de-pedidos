@@ -180,6 +180,10 @@ export default function VentaDetallePage() {
               <div className="flex justify-between gap-4 text-sm"><dt className="text-slate-600">Pagado</dt><dd className="font-medium text-slate-900">{dinero(venta.pagado)}</dd></div>
               <div className="flex justify-between gap-4 border-t border-[#e1e8e3] pt-4 text-lg font-bold"><dt className="text-[#203338]">Saldo pendiente</dt><dd className="text-[#805114]">{dinero(venta.saldo)}</dd></div>
             </dl>
+            {venta.estado !== "cancelado" && <div className="mt-5 flex flex-wrap gap-3 border-t border-[#e1e8e3] pt-5">
+              {venta.estado === "pendiente" && <button type="button" disabled={cargando || ocupado} onClick={() => setModal("pago")} className="ui-primary w-full shadow-md sm:w-auto">+ Agregar pago</button>}
+              <button type="button" disabled={cargando || ocupado} onClick={() => setModal("cancelar")} className="ui-outline w-full sm:w-auto">Cancelar venta</button>
+            </div>}
           </section>
 
           <section className="ui-panel mt-5 overflow-hidden">
@@ -196,10 +200,6 @@ export default function VentaDetallePage() {
             )}
           </section>
 
-          <div className="mt-6 flex flex-wrap gap-3">
-            {venta.estado === "pendiente" && <button type="button" disabled={cargando} onClick={() => setModal("pago")} className="ui-primary grow sm:grow-0">Agregar pago</button>}
-            {venta.estado !== "cancelado" && <button type="button" disabled={cargando} onClick={() => setModal("cancelar")} className="ui-soft grow text-rose-700 sm:grow-0">Cancelar venta</button>}
-          </div>
         </>
       )}
 
@@ -231,7 +231,7 @@ export default function VentaDetallePage() {
               <p className="mt-3 text-sm text-slate-700">¿Confirmas la cancelación de la venta {venta.folio}?</p>
               <div className="mt-6 flex justify-end gap-3">
                 <button type="button" autoFocus disabled={ocupado} onClick={() => setModal(null)} className="ui-soft">Volver</button>
-                <button type="button" disabled={ocupado} onClick={cancelarVenta} className="rounded-xl bg-rose-700 px-4 py-3 text-sm font-semibold text-white disabled:opacity-50">{ocupado ? "Cancelando…" : "Cancelar venta"}</button>
+                <button type="button" disabled={ocupado} onClick={cancelarVenta} className="ui-danger">{ocupado ? "Cancelando…" : "Cancelar venta"}</button>
               </div>
             </div>
           )}

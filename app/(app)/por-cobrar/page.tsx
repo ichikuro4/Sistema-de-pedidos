@@ -97,11 +97,12 @@ export default function PorCobrarPage() {
               const dias = Math.max(0, Math.floor((ahora - new Date(venta.fecha).getTime()) / milisegundosPorDia));
               const vieja = dias > 7 && Number(venta.saldo) > 0;
               return <div key={venta.id} className={`p-4 ${vieja ? "bg-[#fff8e9]" : ""}`}>
-                <button type="button" onClick={() => router.push(`/ventas/${venta.id}`)} className="w-full text-left focus-visible:outline-2 focus-visible:outline-[#17636b]">
+                <button type="button" onClick={() => router.push(`/ventas/${venta.id}`)} className="w-full rounded-xl text-left hover:bg-[#f4faf6] focus-visible:outline-2 focus-visible:outline-[#17636b]">
                   <span className="flex items-center justify-between gap-2"><span className="ui-eyebrow">{venta.folio}</span>{vieja && <span className="rounded-full bg-[#f8dfaa] px-2 py-1 text-xs font-bold text-[#805114]">Más de 7 días</span>}</span>
                   <span className="mt-2 block text-lg font-bold text-[#203338]">{venta.cliente_nombre}</span>
                   <span className="ui-muted mt-1 block text-xs">{fecha(venta.fecha)} · Hace {dias} {dias === 1 ? "día" : "días"}</span>
                   <span className="mt-4 flex items-end justify-between"><span className="ui-muted text-xs">Total {dinero(venta.total)}</span><span className="text-right"><span className="block text-xs text-[#94621d]">Saldo pendiente</span><strong className="text-lg text-[#805114]">{dinero(venta.saldo)}</strong></span></span>
+                  <span className="mt-3 block text-right text-xs font-bold text-[#17636b]">Ver venta →</span>
                 </button>
                 <a href={`tel:${venta.cliente_telefono.replace(/[^\d+]/g, "")}`} className="ui-soft mt-3 w-full">Llamar · {venta.cliente_telefono}</a>
               </div>;

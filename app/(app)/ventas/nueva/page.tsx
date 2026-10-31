@@ -225,7 +225,7 @@ export default function NuevaVentaPage() {
                 <div key={producto.key} className="rounded-2xl border border-[#dce7df] bg-[#f7faf6] p-4">
                   <div className="flex items-center justify-between gap-3">
                     <h3 className="font-semibold text-slate-800">Figura {indice + 1}</h3>
-                    <button type="button" onClick={() => setProductos((actuales) => actuales.filter((item) => item.key !== producto.key))} disabled={productos.length === 1} className="rounded-lg px-2 py-1 text-sm font-medium text-rose-700 hover:bg-rose-50 disabled:cursor-not-allowed disabled:text-slate-400">Quitar</button>
+                    <button type="button" onClick={() => setProductos((actuales) => actuales.filter((item) => item.key !== producto.key))} disabled={productos.length === 1} className="min-h-10 rounded-xl border border-rose-200 bg-white px-3 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50 disabled:border-[#e1e8e3] disabled:bg-[#f4f6f3] disabled:text-slate-400">Quitar</button>
                   </div>
                   <div className="mt-3 grid gap-3 sm:grid-cols-2">
                     <div>
@@ -247,7 +247,7 @@ export default function NuevaVentaPage() {
               ))}
             </div>
             <p id="ayuda-figuras" className="mt-3 text-xs text-slate-500">{cargandoSugerencias ? "Cargando nombres anteriores…" : "Puedes elegir un nombre anterior o escribir uno nuevo. El precio sugerido se puede cambiar."}</p>
-            <button type="button" onClick={() => setProductos((actuales) => [...actuales, { key: siguienteKey.current++, nombre: "", descripcion: "", precio: "", precioManual: false }])} className="mt-4 w-full rounded-xl border-2 border-dashed border-[#9cc8bd] px-4 py-3 text-sm font-bold text-[#17636b] hover:bg-[#edf7f0]">+ Agregar otra figura</button>
+            <button type="button" onClick={() => setProductos((actuales) => [...actuales, { key: siguienteKey.current++, nombre: "", descripcion: "", precio: "", precioManual: false }])} className="mt-4 min-h-12 w-full rounded-xl border-2 border-dashed border-[#79ad9f] bg-white px-4 py-3 text-sm font-bold text-[#17636b] hover:border-[#17636b] hover:bg-[#edf7f0]">+ Agregar otra figura</button>
           </section>
           <section className="ui-panel p-4 sm:p-6">
             <h2 className="ui-section-title"><span className="mr-2 text-[#d1882d]">03</span> Pago</h2>

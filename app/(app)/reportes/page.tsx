@@ -77,7 +77,7 @@ function descargarCsv(nombre: string, encabezados: string[], filas: (string | nu
   document.body.appendChild(enlace);
   enlace.click();
   enlace.remove();
-  window.setTimeout(() => URL.revokeObjectURL(url), 0);
+  window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
 }
 
 export default function ReportesPage() {
@@ -244,9 +244,13 @@ export default function ReportesPage() {
             <p className="mt-2 text-xs text-slate-500">{diaActivo ? `${diaActivo.dia}: ${dinero(diaActivo.monto)}` : "Cada número indica el día del mes. Toca una barra para ver su monto."}</p>
           </section>
 
-          <section aria-label="Exportaciones CSV" className="mt-6 flex flex-col gap-3 sm:flex-row">
-            <button type="button" disabled={exportando !== null} onClick={() => void exportar("ventas")} className="ui-primary">{exportando === "ventas" ? "Preparando CSV…" : "Exportar ventas a CSV"}</button>
-            <button type="button" disabled={exportando !== null} onClick={() => void exportar("pagos")} className="ui-soft">{exportando === "pagos" ? "Preparando CSV…" : "Exportar pagos a CSV"}</button>
+          <section aria-label="Exportaciones CSV" className="ui-panel mt-6 p-4 sm:p-6">
+            <h2 className="ui-section-title">Descargar datos</h2>
+            <p className="ui-muted mt-1 text-sm">Guarda una copia de las ventas o pagos del periodo seleccionado.</p>
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+              <button type="button" disabled={exportando !== null} onClick={() => void exportar("ventas")} className="ui-primary w-full sm:w-auto"><span aria-hidden="true">↓</span>{exportando === "ventas" ? "Preparando CSV…" : "Exportar ventas a CSV"}</button>
+              <button type="button" disabled={exportando !== null} onClick={() => void exportar("pagos")} className="ui-outline w-full sm:w-auto"><span aria-hidden="true">↓</span>{exportando === "pagos" ? "Preparando CSV…" : "Exportar pagos a CSV"}</button>
+            </div>
           </section>
         </>
       )}

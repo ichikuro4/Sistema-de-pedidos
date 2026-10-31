@@ -29,7 +29,7 @@ export function LogoutButton({ compact = false }: { compact?: boolean }) {
         type="button"
         onClick={cerrarSesion}
         disabled={cerrando}
-        className={compact ? "ui-soft min-h-10 px-3 text-xs" : "w-full rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#627572] hover:bg-[#f2f5ef] hover:text-[#23484c] disabled:cursor-wait disabled:opacity-60"}
+        className={compact ? "ui-soft min-h-10 px-3 text-xs" : "ui-outline w-full"}
       >
         {cerrando ? "Saliendo…" : compact ? "Salir" : "Cerrar sesión"}
       </button>
