@@ -1,24 +1,31 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/toast-provider";
 import { dinero, EstadoBadge, fecha, type EstadoVenta } from "@/components/venta-presentacion";
 import { mensajeError } from "@/lib/mensajes-error";
+import { avanzarConEnter } from "@/lib/formulario-teclado";
 
 type Cliente = { id: string; nombre: string; telefono: string };
 type Compra = { id: string; folio: string; fecha: string; estado: EstadoVenta; total: number; pagado: number; saldo: number };
 
 export default function ClienteDetallePage() {
   const { id } = useParams<{ id: string }>();
+  const abrirAlEntrar = useSearchParams().get("editar") === "1";
   const toast = useToast();
   const [supabase] = useState(createClient);
   const [cliente, setCliente] = useState<Cliente | null>(null);
   const [compras, setCompras] = useState<Compra[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const guardando = useRef(false);
+  const [editando, setEditando] = useState(false);
+  const [ocupado, setOcupado] = useState(false);
+  const [nombreEditado, setNombreEditado] = useState("");
+  const [telefonoEditado, setTelefonoEditado] = useState("");
 
   useEffect(() => {
     let activo = true;
@@ -31,6 +38,11 @@ export default function ClienteDetallePage() {
         if (falloCliente) throw falloCliente;
         if (!activo) return;
         setCliente(data as Cliente | null);
+        if (data && abrirAlEntrar) {
+          setNombreEditado(data.nombre);
+          setTelefonoEditado(data.telefono);
+          setEditando(true);
+        }
         if (!data) { setCompras([]); return; }
 
         const historial: Compra[] = [];
@@ -54,7 +66,47 @@ export default function ClienteDetallePage() {
     }
     void cargar();
     return () => { activo = false; };
-  }, [supabase, id, toast]);
+  }, [supabase, id, abrirAlEntrar, toast]);
+
+  function abrirEdicion() {
+    if (!cliente) return;
+    setNombreEditado(cliente.nombre);
+    setTelefonoEditado(cliente.telefono);
+    setEditando(true);
+  }
+
+  async function guardarCliente(evento: FormEvent<HTMLFormElement>) {
+    evento.preventDefault();
+    if (!cliente || guardando.current) return;
+    const nombre = nombreEditado.trim();
+    const telefono = telefonoEditado.trim();
+    if (!nombre || !telefono) {
+      toast("error", "Completa el nombre y el teléfono del cliente.");
+      return;
+    }
+    if (nombre === cliente.nombre && telefono === cliente.telefono) {
+      setEditando(false);
+      return;
+    }
+    guardando.current = true;
+    setOcupado(true);
+    try {
+      const { error: fallo } = await supabase.rpc("actualizar_cliente", {
+        p_cliente_id: cliente.id,
+        p_nombre: nombre,
+        p_telefono: telefono,
+      });
+      if (fallo) throw fallo;
+      setCliente({ ...cliente, nombre, telefono });
+      setEditando(false);
+      toast("exito", "Cliente actualizado.");
+    } catch (fallo) {
+      toast("error", mensajeError(fallo, "No se pudo actualizar el cliente. Inténtalo de nuevo."));
+    } finally {
+      guardando.current = false;
+      setOcupado(false);
+    }
+  }
 
   const vigentes = compras.filter((compra) => compra.estado !== "cancelado");
   const vendido = vigentes.reduce((suma, compra) => suma + Math.round(Number(compra.total) * 100), 0) / 100;
@@ -66,7 +118,18 @@ export default function ClienteDetallePage() {
     {!cargando && error && <p role="alert" className="mt-6 rounded-xl bg-rose-50 p-4 text-sm text-rose-800">{error}</p>}
     {!cargando && !error && !cliente && <p className="ui-panel ui-muted mt-6 p-6">No se encontró este cliente.</p>}
     {!cargando && !error && cliente && <>
-      <header className="mt-6"><p className="ui-eyebrow">Ficha de cliente</p><h1 className="ui-title mt-2">{cliente.nombre}</h1><a href={`tel:${cliente.telefono.replace(/[^\d+]/g, "")}`} className="ui-soft mt-4">Llamar · {cliente.telefono}</a></header>
+      <header className="mt-6"><p className="ui-eyebrow">Ficha de cliente</p><h1 className="ui-title mt-2">{cliente.nombre}</h1><div className="mt-4 flex flex-wrap gap-3"><button type="button" onClick={abrirEdicion} aria-expanded={editando} aria-controls="formulario-editar-cliente" className="ui-primary w-full sm:w-auto">✎ Editar cliente</button><a href={`tel:${cliente.telefono.replace(/[^\d+]/g, "")}`} className="ui-soft w-full sm:w-auto">Llamar · {cliente.telefono}</a></div></header>
+      {editando && <section id="formulario-editar-cliente" className="ui-panel mt-5 p-5 sm:p-6" aria-label="Editar cliente">
+        <h2 className="ui-section-title">Editar datos del cliente</h2>
+        <form onSubmit={guardarCliente} onKeyDown={avanzarConEnter} className="mt-4">
+          <fieldset disabled={ocupado} className="grid gap-4 sm:grid-cols-2">
+            <label className="block text-sm font-semibold text-[#294d52]">Nombre *<input autoFocus required type="text" value={nombreEditado} onChange={(e) => setNombreEditado(e.target.value)} className="ui-input mt-2" /></label>
+            <label className="block text-sm font-semibold text-[#294d52]">Teléfono *<input required type="tel" inputMode="tel" value={telefonoEditado} onChange={(e) => setTelefonoEditado(e.target.value)} className="ui-input mt-2" /></label>
+          </fieldset>
+          <p className="ui-muted mt-3 text-xs">Los cambios se aplican a la ficha. Los datos de ventas anteriores se conservan como fueron registrados.</p>
+          <div className="mt-5 flex flex-wrap gap-3"><button type="submit" disabled={ocupado} className="ui-primary">{ocupado ? "Guardando…" : "Guardar cambios"}</button><button type="button" disabled={ocupado} onClick={() => setEditando(false)} className="ui-soft">Cancelar</button></div>
+        </form>
+      </section>}
       <section aria-label="Resumen del cliente" className="mt-7 grid gap-3 sm:grid-cols-3">
         <div className="ui-panel p-5"><p className="ui-muted text-sm">Compras registradas</p><p className="mt-2 text-3xl font-extrabold text-[#203338]">{compras.length}</p></div>
         <div className="ui-panel p-5"><p className="ui-muted text-sm">Total comprado</p><p className="mt-2 text-2xl font-extrabold text-[#203338]">{dinero(vendido)}</p></div>

@@ -8,9 +8,12 @@ import { avanzarConEnter } from "@/lib/formulario-teclado";
 import { mensajeError } from "@/lib/mensajes-error";
 
 type TipoPago = "completo" | "parcial";
+type ModoCliente = "existente" | "nuevo";
+type Cliente = { id: string; nombre: string; telefono: string };
 type Producto = { key: number; nombre: string; descripcion: string; precio: string; precioManual: boolean };
 type Sugerencia = { nombre: string; precio: number };
 type VentaLista = {
+  clienteId: string | null;
   clienteNombre: string;
   clienteTelefono: string;
   tipoPago: TipoPago;
@@ -27,12 +30,23 @@ function centimos(valor: string) {
   return Number.isSafeInteger(resultado) ? resultado : null;
 }
 
+function claveTelefono(telefono: string) {
+  const digitos = telefono.replace(/\D/g, "");
+  return digitos.length === 11 && digitos.startsWith("51") ? digitos.slice(2) : digitos || telefono.trim().toLocaleLowerCase("es");
+}
+
 export default function NuevaVentaPage() {
   const router = useRouter();
   const toast = useToast();
   const [supabase] = useState(createClient);
   const siguienteKey = useRef(2);
   const ocupada = useRef(false);
+  const [modoCliente, setModoCliente] = useState<ModoCliente>("existente");
+  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [clienteSeleccionado, setClienteSeleccionado] = useState<Cliente | null>(null);
+  const [busquedaCliente, setBusquedaCliente] = useState("");
+  const [cargandoClientes, setCargandoClientes] = useState(true);
+  const [errorClientes, setErrorClientes] = useState<string | null>(null);
   const [clienteNombre, setClienteNombre] = useState("");
   const [clienteTelefono, setClienteTelefono] = useState("");
   const [tipoPago, setTipoPago] = useState<TipoPago>("completo");
@@ -44,6 +58,40 @@ export default function NuevaVentaPage() {
   const [guardada, setGuardada] = useState(false);
   const [duplicados, setDuplicados] = useState<string[]>([]);
   const [ventaPendiente, setVentaPendiente] = useState<VentaLista | null>(null);
+
+  useEffect(() => {
+    let activo = true;
+    async function cargarClientes() {
+      const encontrados: Cliente[] = [];
+      try {
+        while (activo) {
+          const { data, count, error } = await supabase.from("clientes")
+            .select("id, nombre, telefono", { count: "exact" })
+            .order("nombre", { ascending: true }).order("id", { ascending: true })
+            .range(encontrados.length, encontrados.length + 999);
+          if (error) throw error;
+          if (!activo) return;
+          encontrados.push(...((data ?? []) as Cliente[]));
+          if (!data?.length || encontrados.length >= (count ?? encontrados.length)) break;
+        }
+        if (activo) {
+          setClientes(encontrados);
+          if (encontrados.length === 0) setModoCliente("nuevo");
+        }
+      } catch (fallo) {
+        if (activo) {
+          const mensaje = mensajeError(fallo, "No se pudieron cargar los clientes. Puedes registrar uno nuevo.");
+          setErrorClientes(mensaje);
+          setModoCliente("nuevo");
+          toast("error", mensaje);
+        }
+      } finally {
+        if (activo) setCargandoClientes(false);
+      }
+    }
+    void cargarClientes();
+    return () => { activo = false; };
+  }, [supabase, toast]);
 
   useEffect(() => {
     let activo = true;
@@ -76,6 +124,23 @@ export default function NuevaVentaPage() {
 
   const totalCentimos = productos.reduce((suma, producto) => suma + (centimos(producto.precio) ?? 0), 0);
   const abonoCentimos = tipoPago === "completo" ? totalCentimos : (centimos(abono) ?? 0);
+  const clientesFiltrados = clientes.filter((cliente) => `${cliente.nombre} ${cliente.telefono}`.toLocaleLowerCase("es").includes(busquedaCliente.trim().toLocaleLowerCase("es")));
+
+  function cambiarModoCliente(modo: ModoCliente) {
+    if (modo === modoCliente) return;
+    setModoCliente(modo);
+    setClienteSeleccionado(null);
+    setClienteNombre("");
+    setClienteTelefono("");
+    setBusquedaCliente("");
+  }
+
+  function seleccionarCliente(id: string) {
+    const seleccionado = clientes.find((cliente) => cliente.id === id) ?? null;
+    setClienteSeleccionado(seleccionado);
+    setClienteNombre(seleccionado?.nombre ?? "");
+    setClienteTelefono(seleccionado?.telefono ?? "");
+  }
 
   function cambiarProducto(key: number, campoProducto: "nombre" | "descripcion" | "precio", valor: string) {
     setProductos((actuales) => actuales.map((producto) => {
@@ -90,9 +155,20 @@ export default function NuevaVentaPage() {
   }
 
   function validar(): VentaLista | null {
+    if (modoCliente === "existente" && !clienteSeleccionado) {
+      toast("error", "Selecciona un cliente existente o cambia a Cliente nuevo.");
+      return null;
+    }
     if (!clienteNombre.trim() || !clienteTelefono.trim()) {
       toast("error", "Completa el nombre y el teléfono del cliente.");
       return null;
+    }
+    if (modoCliente === "nuevo") {
+      const anterior = clientes.find((cliente) => claveTelefono(cliente.telefono) === claveTelefono(clienteTelefono));
+      if (anterior) {
+        toast("error", `El teléfono ya pertenece a ${anterior.nombre}. Selecciónalo como cliente existente.`);
+        return null;
+      }
     }
     const items: VentaLista["items"] = [];
     for (const [indice, producto] of productos.entries()) {
@@ -113,7 +189,7 @@ export default function NuevaVentaPage() {
       toast("error", "El abono debe estar entre cero y el total, con hasta dos decimales.");
       return null;
     }
-    return { clienteNombre: clienteNombre.trim(), clienteTelefono: clienteTelefono.trim(), tipoPago, pagoInicial: inicial / 100, items };
+    return { clienteId: modoCliente === "existente" ? clienteSeleccionado?.id ?? null : null, clienteNombre: clienteNombre.trim(), clienteTelefono: clienteTelefono.trim(), tipoPago, pagoInicial: inicial / 100, items };
   }
 
   async function guardar(venta: VentaLista) {
@@ -123,9 +199,18 @@ export default function NuevaVentaPage() {
     setVentaPendiente(null);
     setDuplicados([]);
     try {
+      let nombreCliente = venta.clienteNombre;
+      let telefonoCliente = venta.clienteTelefono;
+      if (venta.clienteId) {
+        const { data: perfil, error: errorPerfil } = await supabase.from("clientes")
+          .select("nombre, telefono").eq("id", venta.clienteId).single();
+        if (errorPerfil || !perfil) throw errorPerfil ?? new Error("El cliente no existe");
+        nombreCliente = perfil.nombre;
+        telefonoCliente = perfil.telefono;
+      }
       const { data: id, error } = await supabase.rpc("crear_venta", {
-        p_cliente_nombre: venta.clienteNombre,
-        p_cliente_telefono: venta.clienteTelefono,
+        p_cliente_nombre: nombreCliente,
+        p_cliente_telefono: telefonoCliente,
         p_tipo_pago: venta.tipoPago,
         p_items: venta.items,
         p_pago_inicial: venta.pagoInicial,
@@ -149,6 +234,9 @@ export default function NuevaVentaPage() {
       toast("exito", folio ? `Venta guardada · Folio ${folio}` : "Venta guardada correctamente.");
       setClienteNombre("");
       setClienteTelefono("");
+      setClienteSeleccionado(null);
+      setBusquedaCliente("");
+      setModoCliente("existente");
       setTipoPago("completo");
       setProductos([{ key: siguienteKey.current++, nombre: "", descripcion: "", precio: "", precioManual: false }]);
       setAbono("");
@@ -205,14 +293,32 @@ export default function NuevaVentaPage() {
         <fieldset disabled={ocupado || Boolean(ventaPendiente) || guardada} className="space-y-5 disabled:opacity-75">
           <section className="ui-panel p-4 sm:p-6">
             <h2 className="ui-section-title"><span className="mr-2 text-[#d1882d]">01</span> Cliente</h2>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <div role="group" aria-label="Tipo de cliente" className="mt-4 grid grid-cols-2 gap-3">
+              <button type="button" aria-pressed={modoCliente === "existente"} disabled={cargandoClientes || clientes.length === 0} onClick={() => cambiarModoCliente("existente")} className={`min-h-12 rounded-xl border px-3 py-3 text-sm font-bold transition-colors ${modoCliente === "existente" ? "border-[#17636b] bg-[#e9f3ef] text-[#124d55]" : "border-[#d3dfda] bg-white text-[#526b6f] hover:border-[#17636b]"} disabled:cursor-not-allowed disabled:opacity-50`}>Cliente existente</button>
+              <button type="button" aria-pressed={modoCliente === "nuevo"} onClick={() => cambiarModoCliente("nuevo")} className={`min-h-12 rounded-xl border px-3 py-3 text-sm font-bold transition-colors ${modoCliente === "nuevo" ? "border-[#17636b] bg-[#e9f3ef] text-[#124d55]" : "border-[#d3dfda] bg-white text-[#526b6f] hover:border-[#17636b]"}`}>Cliente nuevo</button>
+            </div>
+            {modoCliente === "existente" ? <div className="mt-5 space-y-4">
+              <label className="block text-sm font-semibold text-[#294d52]">Buscar cliente
+                <input autoFocus type="search" value={busquedaCliente} onChange={(e) => { setBusquedaCliente(e.target.value); seleccionarCliente(""); }} placeholder="Nombre o teléfono" className={campo} />
+              </label>
+              <label className="block text-sm font-semibold text-[#294d52]">Seleccionar cliente *
+                <select value={clienteSeleccionado?.id ?? ""} onChange={(e) => seleccionarCliente(e.target.value)} required className={campo}>
+                  <option value="">{cargandoClientes ? "Cargando clientes…" : "Elige un cliente"}</option>
+                  {clientesFiltrados.map((cliente) => <option key={cliente.id} value={cliente.id}>{cliente.nombre} · {cliente.telefono}</option>)}
+                </select>
+              </label>
+              {clientesFiltrados.length === 0 && !cargandoClientes && <p className="ui-muted text-sm">No se encontraron clientes. Puedes cambiar a “Cliente nuevo”.</p>}
+              {clienteSeleccionado && <div className="rounded-xl border border-[#bddbd0] bg-[#f1f8f2] p-4 text-sm"><p className="font-bold text-[#203338]">Cliente seleccionado: {clienteSeleccionado.nombre}</p><p className="ui-muted mt-1">{clienteSeleccionado.telefono}</p></div>}
+            </div> : <div className="mt-5 grid gap-4 sm:grid-cols-2">
               <label className="block text-sm font-medium text-slate-700">Nombre *
                 <input autoFocus className={campo} type="text" autoComplete="name" value={clienteNombre} onChange={(e) => setClienteNombre(e.target.value)} required placeholder="Nombre del cliente" />
               </label>
               <label className="block text-sm font-medium text-slate-700">Teléfono *
                 <input className={campo} type="tel" inputMode="tel" autoComplete="tel" value={clienteTelefono} onChange={(e) => setClienteTelefono(e.target.value)} required placeholder="Número de contacto" />
               </label>
-            </div>
+              <p className="ui-muted text-xs sm:col-span-2">La ficha del cliente se creará al guardar la venta.</p>
+            </div>}
+            {errorClientes && <p role="alert" className="mt-3 text-sm text-rose-700">{errorClientes}</p>}
           </section>
           <section className="ui-panel p-4 sm:p-6">
             <div className="flex items-baseline justify-between gap-3">

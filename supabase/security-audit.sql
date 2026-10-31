@@ -1,10 +1,10 @@
 -- Ejecutar en Supabase SQL Editor después de security-hardening.sql.
--- Las tres tablas deben mostrar rls_activa=true.
+-- Las tablas existentes deben mostrar rls_activa=true.
 SELECT c.relname AS tabla, c.relrowsecurity AS rls_activa
 FROM pg_class AS c
 JOIN pg_namespace AS n ON n.oid = c.relnamespace
 WHERE n.nspname = 'public'
-  AND c.relname IN ('ventas', 'venta_items', 'pagos')
+  AND c.relname IN ('ventas', 'venta_items', 'pagos', 'clientes')
 ORDER BY c.relname;
 
 -- Las dos vistas deben mostrar security_invoker=true.
@@ -24,14 +24,14 @@ WHERE n.nspname = 'public'
 ORDER BY c.relname;
 
 -- Las funciones de escritura no deben ser ejecutables por anon;
--- su search_path debe ser vacío y las tres deben ser SECURITY DEFINER.
+-- su search_path debe ser vacío y deben ser SECURITY DEFINER.
 SELECT n.nspname AS esquema, p.proname AS funcion,
   p.prosecdef AS security_definer, p.proconfig AS configuracion,
   has_function_privilege('anon', p.oid, 'EXECUTE') AS anon_puede_ejecutar,
   has_function_privilege('authenticated', p.oid, 'EXECUTE') AS autenticado_puede_ejecutar
 FROM pg_proc AS p
 JOIN pg_namespace AS n ON n.oid = p.pronamespace
-WHERE (n.nspname = 'public' AND p.proname IN ('crear_venta', 'agregar_pago', 'cancelar_venta'))
+WHERE (n.nspname = 'public' AND p.proname IN ('crear_venta', 'agregar_pago', 'cancelar_venta', 'actualizar_cliente'))
    OR (n.nspname = 'private' AND p.proname = 'es_dueno')
 ORDER BY n.nspname, p.proname;
 
@@ -44,14 +44,14 @@ SELECT c.relname AS tabla,
 FROM pg_class AS c
 JOIN pg_namespace AS n ON n.oid = c.relnamespace
 WHERE n.nspname = 'public'
-  AND c.relname IN ('ventas', 'venta_items', 'pagos')
+  AND c.relname IN ('ventas', 'venta_items', 'pagos', 'clientes')
 ORDER BY c.relname;
 
 -- Todas las políticas de tablas de ventas deben llamar a private.es_dueno().
 SELECT tablename, policyname, cmd, qual, with_check
 FROM pg_policies
 WHERE schemaname = 'public'
-  AND tablename IN ('ventas', 'venta_items', 'pagos')
+  AND tablename IN ('ventas', 'venta_items', 'pagos', 'clientes')
 ORDER BY tablename, policyname;
 
 -- El cliente no debe poder avanzar folios directamente.

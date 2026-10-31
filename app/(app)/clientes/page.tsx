@@ -64,9 +64,10 @@ export default function ClientesPage() {
       <div className="ui-muted border-b border-[#e1e8e3] px-5 py-4 text-sm">{cargando ? "Cargando clientes…" : `${total} ${total === 1 ? "cliente" : "clientes"}`}</div>
       {error ? <p role="alert" className="p-5 text-sm text-rose-700">{error}</p> : !cargando && clientes.length === 0 ? <p className="ui-muted p-8 text-center text-sm">No se encontraron clientes.</p> :
         <div className="divide-y divide-[#e1e8e3]">{clientes.map((cliente) =>
-          <Link key={cliente.id} href={`/clientes/${cliente.id}`} className="flex items-center justify-between gap-4 px-5 py-4 transition-colors hover:bg-[#f4faf6] focus-visible:outline-2 focus-visible:outline-[#17636b]">
-            <span><strong className="block text-[#203338]">{cliente.nombre}</strong><span className="ui-muted mt-1 block text-sm">{cliente.telefono}</span></span><span aria-hidden="true" className="text-lg text-[#17636b]">›</span>
-          </Link>)}</div>}
+          <div key={cliente.id} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-[#f4faf6] sm:px-5">
+            <Link href={`/clientes/${cliente.id}`} className="min-w-0 flex-1 rounded-lg py-1 focus-visible:outline-2 focus-visible:outline-[#17636b]"><strong className="block truncate text-[#203338]">{cliente.nombre}</strong><span className="ui-muted mt-1 block text-sm">{cliente.telefono}</span></Link>
+            <Link href={`/clientes/${cliente.id}?editar=1`} className="ui-outline shrink-0 px-3 text-xs sm:text-sm">Editar</Link>
+          </div>)}</div>}
       {!error && total > porPagina && <nav aria-label="Paginación de clientes" className="flex items-center justify-between gap-3 border-t border-[#e1e8e3] p-4 text-sm">
         <button type="button" className="ui-soft" disabled={pagina === 0 || cargando} onClick={() => setPagina((actual) => actual - 1)}>Anterior</button>
         <span className="ui-muted">{pagina + 1} de {paginas}</span>

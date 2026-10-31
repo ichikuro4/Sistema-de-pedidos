@@ -14,6 +14,9 @@ const mensajesNegocio = [
   "No tienes permiso para registrar ventas",
   "No tienes permiso para registrar pagos",
   "No tienes permiso para cancelar ventas",
+  "No tienes permiso para editar clientes",
+  "El cliente no existe",
+  "Ese teléfono ya pertenece a otro cliente",
 ];
 
 export function mensajeError(error: unknown, alternativa: string) {

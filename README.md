@@ -19,10 +19,13 @@ Sistema de ventas de figuritas con Next.js, Supabase Auth y PostgreSQL.
 2. Si la base es nueva, ejecuta [supabase/schema.sql](supabase/schema.sql) en el SQL Editor. Si ya contiene ventas, aplica **solo** [supabase/security-hardening.sql](supabase/security-hardening.sql); no vuelvas a ejecutar el esquema inicial.
 3. Ejecuta [supabase/clientes-migration.sql](supabase/clientes-migration.sql) para crear las fichas de clientes, asociar las ventas existentes y activar la asociación automática de ventas nuevas. Este script también crea el esquema `private` y la comprobación del dueño si aún faltan. Ejecútalo **antes** de usar la nueva versión de la app.
 4. Si quieres probar con datos ficticios, ejecuta después [supabase/clientes-demo.sql](supabase/clientes-demo.sql). Crea tres clientes y seis ventas de muestra; María tiene tres compras con distintas formas de escribir su teléfono.
-5. En **Authentication → Users**, crea el usuario del dueño. El sistema no tiene registro público.
-6. Ejecuta `npm install`, `npm run dev` y abre la URL local. Para comprobar la compilación, usa `npm run build`.
+5. Ejecuta [supabase/clientes-edicion.sql](supabase/clientes-edicion.sql) para habilitar **Editar cliente** en la ficha. Este SQL protege los datos editados para que una venta nueva no los sobrescriba.
+6. En **Authentication → Users**, crea el usuario del dueño. El sistema no tiene registro público.
+7. Ejecuta `npm install`, `npm run dev` y abre la URL local. Para comprobar la compilación, usa `npm run build`.
 
-La ficha agrupa compras por teléfono normalizado (quita espacios, símbolos y el prefijo peruano `+51` cuando corresponde). El nombre y teléfono de cada venta permanecen como estaban; la ficha muestra los datos más recientes. Si dos personas comparten número, quedarán en la misma ficha. La base no recibe automáticamente el SQL al desplegar en Vercel.
+La ficha agrupa compras por teléfono normalizado (quita espacios, símbolos y el prefijo peruano `+51` cuando corresponde). El nombre y teléfono de cada venta permanecen como estaban; la ficha muestra los datos más recientes hasta que se edita manualmente. Una venta nueva no sobrescribe una ficha editada. Si dos personas comparten número, quedarán en la misma ficha. La base no recibe automáticamente el SQL al desplegar en Vercel.
+
+En **Nueva venta**, elige **Cliente existente** para buscarlo por nombre o teléfono y seleccionar su ficha. Elige **Cliente nuevo** para escribir sus datos; la ficha se creará al guardar. En **Clientes**, cada registro tiene un botón **Editar** y también se puede editar desde su ficha.
 
 ### Seguridad de la base existente
 
